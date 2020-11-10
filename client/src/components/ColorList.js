@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import {axiosWithAuth} from "../utils/axiosWithAuth";
 
 const initialColor = {
   color: "",
@@ -7,7 +8,7 @@ const initialColor = {
 };
 
 const ColorList = ({ colors, updateColors }) => {
-  console.log(colors);
+  console.log("ColorList passed down ? ",colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
 
@@ -16,15 +17,48 @@ const ColorList = ({ colors, updateColors }) => {
     setColorToEdit(color);
   };
 
+  // put colors /api/colors/:id
   const saveEdit = e => {
     e.preventDefault();
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
+
+    //thinking of using if else statement here 
+    axiosWithAuth()
+    .put(`http://localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit)
+    .then(res => {
+      console.log("Color list component put request to save updated color :", res.data);
+      colorToEdit.map(coloritem =>{
+        if(coloritem.id === res.data.id){
+          return res;
+        }else {
+         console.log("we've failed our put mapping :(");
+        }
+      })
+      console.log("lets see our colorToEdit :", colorToEdit);
+
+    })
+    .catch(err => {
+      console.log("put request to save updated color failed ! We're almost there : ", err);
+    });
   };
 
+  // delete colors /api/colors/:id
+  //thinking of using a filter as a way to delete our colors 
   const deleteColor = color => {
     // make a delete request to delete this color
+    axiosWithAuth()
+    .delete(`http://localhost:5000/api/colors/${colorToEdit.id}`)
+    .then(res => {
+      console.log("delete request to delete specified color success ! or did it ?:", colorToEdit);
+      // colorToEdit.filter(coloritem => {
+      //   coloritem.id !== colors.id
+      // })
+    })
+    .catch(err =>{ 
+      console.log("our delete request has failed : ", err);
+    });
   };
 
   return (
