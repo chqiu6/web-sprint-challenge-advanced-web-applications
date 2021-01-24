@@ -7,7 +7,7 @@ const initialColor = {
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors }) => {
+const ColorList = ({ colors, updateColors, colorListUseEffect}) => {
   console.log("ColorList passed down ? ",colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
@@ -24,18 +24,12 @@ const ColorList = ({ colors, updateColors }) => {
     // think about where will you get the id from...
     // where is is saved right now?
 
-    //thinking of using if else statement here 
+  
     axiosWithAuth()
     .put(`http://localhost:5000/api/colors/${colorToEdit.id}`, colorToEdit)
     .then(res => {
       console.log("Color list component put request to save updated color :", res.data);
-      colorToEdit.map(coloritem =>{
-        if(coloritem.id === res.data.id){
-          return res;
-        }else {
-         console.log("we've failed our put mapping :(");
-        }
-      })
+      colorListUseEffect();
       console.log("lets see our colorToEdit :", colorToEdit);
 
     })
@@ -44,17 +38,14 @@ const ColorList = ({ colors, updateColors }) => {
     });
   };
 
-  // delete colors /api/colors/:id
-  //thinking of using a filter as a way to delete our colors 
+  // delete colors /api/colors/:id 
   const deleteColor = color => {
     // make a delete request to delete this color
     axiosWithAuth()
-    .delete(`http://localhost:5000/api/colors/${colorToEdit.id}`)
+    .delete(`http://localhost:5000/api/colors/${color.id}`)
     .then(res => {
       console.log("delete request to delete specified color success ! or did it ?:", colorToEdit);
-      // colorToEdit.filter(coloritem => {
-      //   coloritem.id !== colors.id
-      // })
+      colorListUseEffect();
     })
     .catch(err =>{ 
       console.log("our delete request has failed : ", err);
@@ -68,8 +59,8 @@ const ColorList = ({ colors, updateColors }) => {
         {colors.map(color => (
           <li key={color.color} onClick={() => editColor(color)}>
             <span>
-              <span className="delete" onClick={e => {
-                    e.stopPropagation();
+              <span className="delete" onClick={() => {
+                    // e.stopPropagation();
                     deleteColor(color)
                   }
                 }>
